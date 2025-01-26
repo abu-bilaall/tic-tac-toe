@@ -71,6 +71,66 @@ function GameController() {
     }
 
     // win/lose/draw logic
+    const xWinSequence = "XXX";
+    const oWinSequence = "OOO";
+
+    function checkRow(sequence) {
+        return gameboard.getBoard().some(row => row.join('') === sequence);
+    }
+
+    function checkColumn(sequence) {
+        // Loop through each column index and check if all values match the sequence
+        const rows = 3, columns = 3, board = gameboard.getBoard();
+
+        for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
+            let columnSequence = "";
+
+            for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+                columnSequence += board[rowIndex][columnIndex];
+            }
+
+            if (columnSequence === sequence) {
+                return true; // Column matches the sequence
+            }
+        }
+
+        return false; // No matching column found
+    }
+
+    function checkDiagonals(sequence) {
+        const board = gameboard.getBoard(), dimension = 3;
+    
+        let diag1Sequence = ""; // Top-left to bottom-right
+        let diag2Sequence = ""; // Top-right to bottom-left
+        
+        // Checking the two diagonals explicitly
+        for (let i = 0; i < dimension; i++) {
+            diag1Sequence += board[i][i]; // Access first diagonal
+            diag2Sequence += board[i][dimension - 1 - i]; // Access second diagonal
+        }
+    
+        return diag1Sequence === sequence || diag2Sequence === sequence;
+    }
+    
+
+    function setGameResult() {
+        // Win logic
+        if (checkRow(xWinSequence) || checkColumn(xWinSequence) || checkDiagonals(xWinSequence)) {
+            return "X wins";
+        }
+        if (checkRow(oWinSequence) || checkColumn(oWinSequence) || checkDiagonals(oWinSequence)) {
+            return "O wins";
+        }
+
+        // Draw logic
+        if (gameboard.getBoard().flat().every(cell => cell !== "")) {
+            return "Draw";
+        }
+        // No result yet
+        return null;
+    }
+    
+    // gameplay
 }
 // initiate board
 const gameboard = new Gameboard();
