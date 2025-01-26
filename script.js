@@ -1,18 +1,47 @@
-class Person {
-    static species = "Homo Sapiens";
+function Gameboard() {
+    let board = [
+        ["", "", ""],
+        ["", "", ""],
+        ["", "", ""]
+    ];
 
-    static aboutPerson() {
-        return `Specie: ${this.species}`;
-    }
+    // Method to get the board state
+    this.getBoard = function () {
+        return board.map(row => row.slice()); // Return a copy to prevent direct manipulation
+    };
 
-    constructor(firstName, lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
+    // Method to set a piece on the board
+    this.setPiece = function (row, col, piece) {
+        if (board[row][col] === "") { // Ensure the spot is empty
+            board[row][col] = piece;
+            return true; // Success
+        }
+        return false; // Spot already taken
+    };
 
-    getFullName() {
-        return `${this.firstName} ${this.lastName}`;
-    }
+    // Method to display the board in the console (for debugging)
+    this.printBoard = function () {
+        board.forEach(row => console.log(row.join(" | ")));
+        console.log("\n");
+    };
 }
 
-const person1 = new Person('musa', 'abdulrofihi');
+// testing
+const gameboard = new Gameboard();
+
+// Initial state
+console.log("Initial Board:");
+gameboard.printBoard();
+
+// Set pieces
+gameboard.setPiece(0, 0, "X");
+gameboard.setPiece(1, 1, "O");
+gameboard.setPiece(0, 0, "X"); // Attempt to overwrite (should fail)
+
+// Display the board after moves
+console.log("Board After Moves:");
+gameboard.printBoard();
+
+// Get the board state
+console.log("Board State:");
+console.log(gameboard.getBoard());
