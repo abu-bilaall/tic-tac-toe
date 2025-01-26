@@ -1,4 +1,4 @@
-function Gameboard() {
+function GameBoard() {
     // hardcoding the 3x3 gameboard
     let board = [
         ["", "", ""],
@@ -19,6 +19,16 @@ function Gameboard() {
         }
         return false; // Spot already taken
     };
+
+    // Resets board
+    this.resetBoard = function () {
+        board = [
+            ["", "", ""], 
+            ["", "", ""], 
+            ["", "", ""]
+        ];
+    };
+
 
     // Method to display the board in the console (for debugging)
     this.printBoard = function () {
@@ -48,14 +58,16 @@ function GameController() {
             players[0].boardAvatar = userAvatar;
 
             players[1].boardAvatar = "X";
+        } else {
+            players[0].name = userName;
         }
     };
 
     // player turns
-    let currentPlayer = players[0].name;
+    let currentPlayer = "";
     this.getPlayTurn = function () {
-        currentPlayer = currentPlayer === players[0].name ? players[1].name : players[0].name;
         console.log(`${currentPlayer}, it's your turn.\n`);
+        currentPlayer = currentPlayer === players[0].name ? players[1].name : players[0].name;
         return currentPlayer;
     }
 
@@ -67,7 +79,7 @@ function GameController() {
         }
 
         let piece = players.find((player) => player.name == currentPlayer).boardAvatar;
-        gameboard.setPiece(row, col, piece); // set X on the board for user
+        gameboard.setPiece(row, col, piece);
     }
 
     // win/lose/draw logic
@@ -99,27 +111,27 @@ function GameController() {
 
     function checkDiagonals(sequence) {
         const board = gameboard.getBoard(), dimension = 3;
-    
+
         let diag1Sequence = ""; // Top-left to bottom-right
         let diag2Sequence = ""; // Top-right to bottom-left
-        
+
         // Checking the two diagonals explicitly
         for (let i = 0; i < dimension; i++) {
             diag1Sequence += board[i][i]; // Access first diagonal
             diag2Sequence += board[i][dimension - 1 - i]; // Access second diagonal
         }
-    
-        return diag1Sequence === sequence || diag2Sequence === sequence;
+
+        return (diag1Sequence === sequence || diag2Sequence === sequence);
     }
-    
+
 
     function setGameResult() {
         // Win logic
         if (checkRow(xWinSequence) || checkColumn(xWinSequence) || checkDiagonals(xWinSequence)) {
-            return "X wins";
+            return `${players[0].name} wins`;
         }
         if (checkRow(oWinSequence) || checkColumn(oWinSequence) || checkDiagonals(oWinSequence)) {
-            return "O wins";
+            return `${players[1].name} wins`;
         }
 
         // Draw logic
@@ -129,11 +141,15 @@ function GameController() {
         // No result yet
         return null;
     }
-    
+
     // gameplay
+    this.checkGameState = function () {
+        let result = setGameResult();
+        console.log(result);
+    }
 }
 // initiate board
-const gameboard = new Gameboard();
+const gameboard = new GameBoard();
 
 // testing GameController
 const gamecontrol = new GameController();
@@ -146,14 +162,28 @@ gameboard.printBoard();
 gamecontrol.setPlayerCredentials("w0z");
 
 // Set pieces
+gamecontrol.getPlayTurn();
 gamecontrol.playRound(0, 0);
-// gamecontrol.getPlayTurn();
-// gamecontrol.playRound(1, 1);
+gamecontrol.getPlayTurn();
+gamecontrol.playRound(1, 1);
+
+gamecontrol.getPlayTurn();
+gamecontrol.playRound(0, 1);
+gamecontrol.getPlayTurn();
+gamecontrol.playRound(2, 2);
+
+gamecontrol.getPlayTurn();
+gamecontrol.playRound(0, 2);
+gamecontrol.getPlayTurn();
+gamecontrol.playRound(2, 0);
+
+// check game state
+gamecontrol.checkGameState();
 
 // Display the board after moves
 console.log("Board After Moves:");
 gameboard.printBoard();
 
 // Get the board state
-console.log("Board State:");
-console.log(gameboard.getBoard());
+// console.log("Board State:");
+// console.log(gameboard.getBoard());
