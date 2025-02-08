@@ -69,6 +69,12 @@ function GameController() {
         return (`Dear ${userName}, you've selected ${userAvatar} as your board piece.`);
     };
 
+    // returns player avatar
+    this.getPlayerAvatar = function() {
+        let currentPlayerIndex = players.findIndex((player) => player.name === currentPlayer);
+        return players[currentPlayerIndex].boardAvatar;
+    }
+
     // player turns
     let currentPlayer = "";
     this.getPlayTurn = function () {
@@ -199,16 +205,12 @@ function removeChildren(element) {
     }
 }
 
-function createElement(element) {
-    return document.createElement(element);
-}
-
 // handling player choice of game piece
 const info = document.querySelector('#info');
 const pieces = document.querySelectorAll('.pieces');
 pieces.forEach((piece) => {
     piece.addEventListener('click', () => {
-        let playerCredentials = gamecontroller.setPlayerCredentials('User', piece.getAttribute('id').toUpperCase());
+        let playerCredentials = gamecontroller.setPlayerCredentials('user', piece.getAttribute('id').toUpperCase());
         removeChildren(info);
 
         let infoText = document.createElement('div');
@@ -219,5 +221,14 @@ pieces.forEach((piece) => {
         setTimeout(() => {infoText.textContent = "Let's begin!"}, 2000);
         setTimeout(() => {infoText.textContent = gamecontroller.getPlayTurn()}, 4000);
     });
+});
+
+// handling events on the game board
+const gameBoard = document.querySelector('#game-board');
+gameBoard.addEventListener('click', (event) => {
+    let space = event.target;
+    let spaceIndex = space.dataset.index.split('');
+    space.textContent = gamecontroller.getPlayerAvatar();
+    gamecontroller.playRound(spaceIndex[0], spaceIndex[1]);
 });
 
