@@ -150,13 +150,14 @@ function GameController() {
     }
 
 
-    function setGameResult() {
+    function checkGameResult() {
         // Win logic
-        if (checkRow(xWinSequence) || checkColumn(xWinSequence) || checkDiagonals(xWinSequence)) {
-            return `${players[0].name} wins`;
+        if ((checkRow(xWinSequence) || checkColumn(xWinSequence) || checkDiagonals(xWinSequence))) {
+            return `${currentPlayer} wins`;
         }
+
         if (checkRow(oWinSequence) || checkColumn(oWinSequence) || checkDiagonals(oWinSequence)) {
-            return `${players[1].name} wins`;
+            return `${currentPlayer} wins`;
         }
 
         // Draw logic
@@ -171,12 +172,12 @@ function GameController() {
     this.resetGame = function () {
         gameboard.resetBoard();
         currentPlayer = ""; // reset currentPlayer
-        console.log("Game reset. Let's play again.");
+        return ("Game over. Let's play again.");
     }
 
     // gameOver
     this.isGameOver = function () {
-        const result = setGameResult();
+        const result = checkGameResult();
 
         if (result) {
             return true;
@@ -185,10 +186,9 @@ function GameController() {
         return false;
     }
 
-    // gameplay
-    this.checkGameState = function () {
-        let result = setGameResult();
-        console.log(result);
+    // returns game result
+    this.printGameResult = function () {
+        return checkGameResult();
     }
 }
 
@@ -216,8 +216,8 @@ pieces.forEach((piece) => {
         infoText.textContent = playerCredentials;
         info.appendChild(infoText);
 
-        setTimeout(() => { infoText.textContent = "Let's begin!" }, 1000);
-        setTimeout(() => { infoText.textContent = `${gamecontroller.getPlayTurn()}, it's your turn.` }, 2000);
+        setTimeout(() => { infoText.textContent = "Let's begin!" }, 2000);
+        setTimeout(() => { infoText.textContent = `${gamecontroller.getPlayTurn()}, it's your turn.` }, 4000);
     });
 });
 
@@ -236,15 +236,16 @@ gameBoard.addEventListener('click', (event) => {
     gameBoard.dispatchEvent(new Event('turnUpdate'));
 });
 
-// Handling turns and AI moves
+// Handling turns and anton moves
 gameBoard.addEventListener('turnUpdate', () => {
+    if (gamecontroller.isGameOver()) {
+        setTimeout(() => alert(`${gamecontroller.printGameResult()}`), 1000);
+        setTimeout(() => alert(`${gamecontroller.resetGame()}`), 2000);
+        setTimeout(() => {window.location.reload()}, 3000);
+    }
+
     let currentPlayer = gamecontroller.getPlayTurn();
     let infoText = document.querySelector('#info-text');
-
-    if (gamecontroller.isGameOver()) {
-        setTimeout(() => alert(`${currentPlayer} wins!`), 1000);
-        return;
-    }
 
     infoText.textContent = `${currentPlayer}, it's your turn.`;
 
