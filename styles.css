@@ -135,6 +135,11 @@ main {
 
 .board-space {
     border: 3px solid #1e1e1e;
+    font-size: 3rem;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .first-row {
