@@ -1,3 +1,8 @@
+/**
+ * TODOS
+ * finish the game logic
+ * DOM shenangians
+ */
 function GameBoard() {
     // hardcoding the 3x3 gameboard
     let board = [
@@ -23,8 +28,8 @@ function GameBoard() {
     // Resets board
     this.resetBoard = function () {
         board = [
-            ["", "", ""], 
-            ["", "", ""], 
+            ["", "", ""],
+            ["", "", ""],
             ["", "", ""]
         ];
     };
@@ -46,7 +51,6 @@ function GameController() {
 
     // player selecting their name and avatar
     this.setPlayerCredentials = function (userName = 'user', userAvatar = "X") {
-        console.log(`Dear ${userName}, you've selected ${userAvatar} as your board piece.`);
 
         if (userAvatar !== "X" && userAvatar !== "O") {
             console.log("Invalid avatar selected. Please choose 'X' or 'O'.");
@@ -61,14 +65,16 @@ function GameController() {
         } else {
             players[0].name = userName;
         }
+
+        return (`Dear ${userName}, you've selected ${userAvatar} as your board piece.`);
     };
 
     // player turns
     let currentPlayer = "";
     this.getPlayTurn = function () {
-        console.log(`${currentPlayer}, it's your turn.\n`);
         currentPlayer = currentPlayer === players[0].name ? players[1].name : players[0].name;
-        return currentPlayer;
+        console.log(`${currentPlayer}, it's your turn.\n`);
+        return `${currentPlayer}, it's your turn.`;
     }
 
     // a simple game round
@@ -142,48 +148,76 @@ function GameController() {
         return null;
     }
 
+    // reset game
+    this.resetGame = function () {
+        gameboard.resetBoard();
+        currentPlayer = ""; // reset currentPlayer
+        console.log("Game reset. Let's play again.");
+    }
+
+    // gameOver
+    this.gameOver = function () {
+        const result = setGameResult();
+        
+        // 1. Check if a player has won
+        if (result) {
+            console.log(`Game Over! ${currentPlayer} wins!`);
+            // this.resetGame();
+            console.log ({ status: "win", winner: currentPlayer });
+            return { status: "win", winner: currentPlayer };
+        }
+
+        // 2. Check if the game is a draw
+        const isDraw = gameboard.getBoard().every(row => row.every(cell => cell !== ""));
+        if (isDraw) {
+            console.log("Game Over! It's a draw!");
+            // this.resetGame();
+            console.log({ status: "draw", winner: null });
+            return { status: "draw", winner: null };
+        }
+
+        // 3. If no win or draw, game continues
+        console.log({ status: "ongoing"} );
+        return { status: "ongoing" };
+    }
+
     // gameplay
     this.checkGameState = function () {
         let result = setGameResult();
         console.log(result);
     }
 }
-// initiate board
+
+// initiate board and control constructor
 const gameboard = new GameBoard();
+const gamecontroller = new GameController();
 
-// testing GameController
-const gamecontrol = new GameController();
+/* DOM implementation */
+function removeChildren(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
 
-// Initial state
-console.log("Initial Board:");
-gameboard.printBoard();
+function createElement(element) {
+    return document.createElement(element);
+}
 
-// set player credentials
-gamecontrol.setPlayerCredentials("w0z");
+// handling player choice of game piece
+const info = document.querySelector('#info');
+const pieces = document.querySelectorAll('.pieces');
+pieces.forEach((piece) => {
+    piece.addEventListener('click', () => {
+        let playerCredentials = gamecontroller.setPlayerCredentials('User', piece.getAttribute('id').toUpperCase());
+        removeChildren(info);
 
-// Set pieces
-gamecontrol.getPlayTurn();
-gamecontrol.playRound(0, 0);
-gamecontrol.getPlayTurn();
-gamecontrol.playRound(1, 1);
+        let infoText = document.createElement('div');
+        infoText.setAttribute('id', 'info-text');
+        infoText.textContent = playerCredentials;
+        info.appendChild(infoText);
 
-gamecontrol.getPlayTurn();
-gamecontrol.playRound(0, 1);
-gamecontrol.getPlayTurn();
-gamecontrol.playRound(2, 2);
+        setTimeout(() => {infoText.textContent = "Let's begin!"}, 2000);
+        setTimeout(() => {infoText.textContent = gamecontroller.getPlayTurn()}, 4000);
+    });
+});
 
-gamecontrol.getPlayTurn();
-gamecontrol.playRound(0, 2);
-gamecontrol.getPlayTurn();
-gamecontrol.playRound(2, 0);
-
-// check game state
-gamecontrol.checkGameState();
-
-// Display the board after moves
-console.log("Board After Moves:");
-gameboard.printBoard();
-
-// Get the board state
-// console.log("Board State:");
-// console.log(gameboard.getBoard());
