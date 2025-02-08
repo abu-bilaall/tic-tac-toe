@@ -16,6 +16,14 @@ function GameBoard() {
         return board.map(row => row.slice()); // Return a copy to prevent direct manipulation
     };
 
+    this.isBoardSpaceFree = function (row, col) {
+        if (board[row][col] === "") {
+            return true;
+        }
+
+        return false;
+    }
+
     // Method to set a piece on the board
     this.setPiece = function (row, col, piece) {
         if (board[row][col] === "") { // Ensure the spot is empty
@@ -70,7 +78,7 @@ function GameController() {
     };
 
     // returns player avatar
-    this.getPlayerAvatar = function() {
+    this.getPlayerAvatar = function () {
         let currentPlayerIndex = players.findIndex((player) => player.name === currentPlayer);
         return players[currentPlayerIndex].boardAvatar;
     }
@@ -79,8 +87,7 @@ function GameController() {
     let currentPlayer = "";
     this.getPlayTurn = function () {
         currentPlayer = currentPlayer === players[0].name ? players[1].name : players[0].name;
-        console.log(`${currentPlayer}, it's your turn.\n`);
-        return `${currentPlayer}, it's your turn.`;
+        return currentPlayer;
     }
 
     // a simple game round
@@ -92,6 +99,12 @@ function GameController() {
 
         let piece = players.find((player) => player.name == currentPlayer).boardAvatar;
         gameboard.setPiece(row, col, piece);
+    }
+
+    // automating anton's round
+    this.generateComputerChoice = function () {
+        let boardIndexes = ['00', '01', '02', '10', '11', '12', '20', '21', '22'];
+        return boardIndexes[Math.floor(Math.random() * boardIndexes.length)];
     }
 
     // win/lose/draw logic
@@ -162,29 +175,14 @@ function GameController() {
     }
 
     // gameOver
-    this.gameOver = function () {
+    this.isGameOver = function () {
         const result = setGameResult();
-        
-        // 1. Check if a player has won
+
         if (result) {
-            console.log(`Game Over! ${currentPlayer} wins!`);
-            // this.resetGame();
-            console.log ({ status: "win", winner: currentPlayer });
-            return { status: "win", winner: currentPlayer };
+            return true;
         }
 
-        // 2. Check if the game is a draw
-        const isDraw = gameboard.getBoard().every(row => row.every(cell => cell !== ""));
-        if (isDraw) {
-            console.log("Game Over! It's a draw!");
-            // this.resetGame();
-            console.log({ status: "draw", winner: null });
-            return { status: "draw", winner: null };
-        }
-
-        // 3. If no win or draw, game continues
-        console.log({ status: "ongoing"} );
-        return { status: "ongoing" };
+        return false;
     }
 
     // gameplay
@@ -218,8 +216,8 @@ pieces.forEach((piece) => {
         infoText.textContent = playerCredentials;
         info.appendChild(infoText);
 
-        setTimeout(() => {infoText.textContent = "Let's begin!"}, 2000);
-        setTimeout(() => {infoText.textContent = gamecontroller.getPlayTurn()}, 4000);
+        setTimeout(() => { infoText.textContent = "Let's begin!" }, 1000);
+        setTimeout(() => { infoText.textContent = `${gamecontroller.getPlayTurn()}, it's your turn.` }, 2000);
     });
 });
 
@@ -228,7 +226,45 @@ const gameBoard = document.querySelector('#game-board');
 gameBoard.addEventListener('click', (event) => {
     let space = event.target;
     let spaceIndex = space.dataset.index.split('');
+    let [row, column] = spaceIndex.map(Number);
+
+    // updating board w/ player's move
     space.textContent = gamecontroller.getPlayerAvatar();
-    gamecontroller.playRound(spaceIndex[0], spaceIndex[1]);
+    gamecontroller.playRound(row, column);
+
+    // Dispatch a custom event to trigger turn processing
+    gameBoard.dispatchEvent(new Event('turnUpdate'));
 });
 
+// Handling turns and AI moves
+gameBoard.addEventListener('turnUpdate', () => {
+    let currentPlayer = gamecontroller.getPlayTurn();
+    let infoText = document.querySelector('#info-text');
+
+    if (gamecontroller.isGameOver()) {
+        setTimeout(() => alert(`${currentPlayer} wins!`), 1000);
+        return;
+    }
+
+    infoText.textContent = `${currentPlayer}, it's your turn.`;
+
+    // anton's move
+    if (currentPlayer === 'anton') {
+        setTimeout(() => {
+            let boardIndex = gamecontroller.generateComputerChoice();
+            let [aiRow, aiCol] = boardIndex.split('').map(Number);
+
+            while (!gameboard.isBoardSpaceFree(aiRow, aiCol)) {
+                boardIndex = gamecontroller.generateComputerChoice();
+                [aiRow, aiCol] = boardIndex.split('').map(Number);
+            }
+
+            let aiSpace = document.querySelector(`[data-index="${aiRow}${aiCol}"]`);
+            aiSpace.textContent = gamecontroller.getPlayerAvatar();
+            gamecontroller.playRound(aiRow, aiCol);
+
+            // Trigger the next turn update
+            gameBoard.dispatchEvent(new Event('turnUpdate'));
+        }, 2000);
+    }
+});
