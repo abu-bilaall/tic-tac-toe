@@ -127,8 +127,8 @@ main {
 }
 
 #game-board {
-    width: 30vw;
-    height: 800px;
+    width: 25vw;
+    height: 700px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
 }
