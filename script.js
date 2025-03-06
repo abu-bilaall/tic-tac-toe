@@ -1,4 +1,11 @@
-function GameBoard() {
+/**
+ * TODOs:
+ * Freeze gameboard interaction during certain application flow
+ * such as when it is anton's turn
+ */
+
+// initialize gameboard using the module pattern
+const gameboard = function () {
   // hardcoding the 3x3 gameboard
   let board = [
     ["", "", ""],
@@ -7,11 +14,11 @@ function GameBoard() {
   ];
 
   // Method to get the board's state
-  this.getBoard = function () {
+  getBoard = function () {
     return board.map((row) => row.slice()); // Return a copy to prevent direct manipulation
   };
 
-  this.isBoardSpaceFree = function (row, col) {
+  isBoardSpaceFree = function (row, col) {
     if (board[row][col] === "") {
       return true;
     }
@@ -20,8 +27,8 @@ function GameBoard() {
   };
 
   // Method to set a piece on the board
-  this.setPiece = function (row, col, piece) {
-    if (this.isBoardSpaceFree(row, col)) {
+  setPiece = function (row, col, piece) {
+    if (isBoardSpaceFree(row, col)) {
       // Ensure the spot is empty
       board[row][col] = piece;
       return true; // Success
@@ -30,14 +37,16 @@ function GameBoard() {
   };
 
   // Resets board
-  this.resetBoard = function () {
+  resetBoard = function () {
     board = [
       ["", "", ""],
       ["", "", ""],
       ["", "", ""],
     ];
   };
-}
+
+  return { getBoard, isBoardSpaceFree, setPiece, resetBoard };
+}();
 
 function GameController() {
   // initiate players
@@ -201,8 +210,7 @@ function GameController() {
   };
 }
 
-// initiate board and control constructor
-const gameboard = new GameBoard();
+// initialize gamecontroller
 const gamecontroller = new GameController();
 
 /* DOM implementation */
@@ -259,7 +267,9 @@ gameBoard.addEventListener("turnUpdate", () => {
 
     setTimeout(() => alert(`${gamecontroller.resetGame()}`), 2000);
 
-    setTimeout(() => {window.location.reload()}, 3000);
+    setTimeout(() => {
+      window.location.reload();
+    }, 3000);
   } else {
     let currentPlayer = gamecontroller.getPlayTurn();
     let infoText = document.querySelector("#info-text");
